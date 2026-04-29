@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Dashboard Financiero Inteligente</title>
+
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="icon" type="image/png" sizes="192x192" href="descarga-removebg-preview.png">
+</head>
+
+<body>
+
+  <!-- LOGIN -->
+  <section id="authScreen" class="auth-screen">
+    <div class="auth-card">
+      <div class="auth-logo">💰</div>
+
+      <h1>Finanzas Personales</h1>
+      <p>Ingresa con tu cuenta para ver tus datos desde cualquier dispositivo.</p>
+
+      <input id="authEmail" type="email" placeholder="Correo electrónico" />
+      <input id="authPassword" type="password" placeholder="Contraseña" />
+
+      <button id="loginBtn">Iniciar sesión</button>
+      <button id="requestAccountBtn" class="secondary-btn">
+        Solicitar cuenta por WhatsApp
+      </button>
+
+      <p id="authMessage" class="auth-message"></p>
+    </div>
+  </section>
+
+  <!-- APP -->
+  <div class="app hidden" id="app">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-icon">💰</div>
+
+        <div>
+          <h2>Finanzas</h2>
+          <p id="userEmailText">Usuario</p>
+        </div>
+      </div>
+
+      <button class="nav-link active" data-section="resumen" onclick="showSection('resumen')">
+        📊 Resumen
+      </button>
+
+      <button class="nav-link" data-section="ingresos" onclick="showSection('ingresos')">
+        💵 Ingresos
+      </button>
+
+      <button class="nav-link" data-section="gastos" onclick="showSection('gastos')">
+        💳 Gastos
+      </button>
+
+      <button class="nav-link" data-section="ahorro" onclick="showSection('ahorro')">
+        🏦 Ahorro
+      </button>
+
+      <button class="nav-link" data-section="reportes" onclick="showSection('reportes')">
+        📈 Reportes
+      </button>
+
+      <button class="nav-link" data-section="cuentas" onclick="showSection('cuentas')">
+        🏛️ Cuentas
+      </button>
+
+      <div class="sidebar-card">
+        <h4>Estado financiero</h4>
+        <p id="sidebarStatus">Analizando...</p>
+      </div>
+
+      <button id="logoutBtn" class="logout-btn">
+        Cerrar sesión
+      </button>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+
+      <!-- RESUMEN -->
+      <section id="resumen" class="section active-section">
+
+        <div class="topbar resumen-topbar">
+          <div>
+            <h1>Resumen Financiero</h1>
+            <p>Analiza ingresos, gastos, ahorro y estado financiero por mes.</p>
+          </div>
+
+          <div class="month-filter">
+            <label for="monthFilter">📅 Mes</label>
+            <input type="month" id="monthFilter" />
+          </div>
+        </div>
+
+        <div class="summary-hero">
+          <div>
+            <span>Balance del mes</span>
+            <h2 id="generalBalance">S/ 0.00</h2>
+            <p id="balanceMessage">Analizando tu situación financiera...</p>
+          </div>
+
+          <div class="health-circle">
+            <span id="healthScore">0%</span>
+            <small>Salud financiera</small>
+          </div>
+        </div>
+
+        <div class="cards-grid summary-grid">
+
+          <div class="card stat-card">
+            <span>Ingresos del mes</span>
+            <h2 id="totalIncome">S/ 0.00</h2>
+            <p>Total recibido en el mes seleccionado</p>
+          </div>
+
+          <div class="card stat-card">
+            <span>Gastos del mes</span>
+            <h2 id="totalExpenses">S/ 0.00</h2>
+            <p>Total gastado en el mes seleccionado</p>
+          </div>
+
+          <div class="card stat-card">
+            <span>Ahorro del mes</span>
+            <h2 id="currentSaving">S/ 0.00</h2>
+            <p>Ingresos menos gastos</p>
+          </div>
+
+          <div class="card stat-card">
+            <span>Mayor gasto</span>
+            <h2 id="topCategory">---</h2>
+            <p>Categoría principal del mes</p>
+          </div>
+
+          <div class="card stat-card">
+            <span>Mayor ingreso</span>
+            <h2 id="topIncomeCategory">---</h2>
+            <p>Fuente principal del mes</p>
+          </div>
+
+          <div class="card stat-card">
+            <span>Cuentas activas</span>
+            <h2 id="activeAccountsCount">0</h2>
+            <p>Cuentas disponibles</p>
+          </div>
+
+          <div class="card stat-card">
+            <span>Saldo en cuentas</span>
+            <h2 id="totalAccountsBalance">S/ 0.00</h2>
+            <p>Total registrado</p>
+          </div>
+
+          <div class="card stat-card">
+            <span>Presupuesto usado</span>
+            <h2 id="budgetUsedPercent">0%</h2>
+            <p>Del presupuesto mensual</p>
+          </div>
+
+          <div class="card stat-card">
+            <span>Movimientos de gasto</span>
+            <h2 id="expensesCount">0</h2>
+            <p>Gastos del mes seleccionado</p>
+          </div>
+
+          <div class="card stat-card">
+            <span>Movimientos de ingreso</span>
+            <h2 id="incomesCount">0</h2>
+            <p>Ingresos del mes seleccionado</p>
+          </div>
+
+        </div>
+
+        <div class="resumen-layout">
+
+          <div class="card">
+            <h2>Progreso del mes</h2>
+
+            <div class="mini-progress-item">
+              <div>
+                <strong>Presupuesto mensual</strong>
+                <span id="miniBudgetText">S/ 0.00 usado</span>
+              </div>
+
+              <div class="progress-bar budget">
+                <div id="miniBudgetProgress"></div>
+              </div>
+            </div>
+
+            <div class="mini-progress-item">
+              <div>
+                <strong>Meta de ahorro</strong>
+                <span id="miniSavingText">S/ 0.00 ahorrado</span>
+              </div>
+
+              <div class="progress-bar">
+                <div id="miniSavingProgress"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h2>Alertas rápidas</h2>
+            <div id="quickAlerts" class="quick-alerts"></div>
+          </div>
+
+        </div>
+
+        <div class="card">
+          <div class="section-header">
+            <div>
+              <h2>Resumen por meses</h2>
+              <p>Compara ingresos, gastos, ahorro y movimientos de cada mes.</p>
+            </div>
+          </div>
+
+          <div class="monthly-summary-list" id="monthlySummaryList"></div>
+        </div>
+
+        <div class="card">
+          <h2>Recomendaciones inteligentes</h2>
+          <div id="recommendations" class="recommendations"></div>
+        </div>
+
+      </section>
+
+      <!-- INGRESOS -->
+      <section id="ingresos" class="section">
+
+        <h1>Ingresos</h1>
+        <p class="section-description">
+          Registra las ganancias mensuales de cada cliente: sueldo, negocio, ventas, freelance u otros ingresos.
+        </p>
+
+        <div class="card">
+          <h2>Agregar ingreso</h2>
+
+          <form id="incomeForm" class="form-grid">
+            <input id="incomeName" placeholder="Descripción: Sueldo, venta, freelance..." required />
+
+            <input id="incomeAmount" type="number" placeholder="Monto recibido" required />
+
+            <select id="incomeCategory">
+              <option>Sueldo</option>
+              <option>Negocio</option>
+              <option>Freelance</option>
+              <option>Ventas</option>
+              <option>Bonos</option>
+              <option>Inversiones</option>
+              <option>Regalo</option>
+              <option>Otros</option>
+            </select>
+
+            <select id="incomeAccount"></select>
+
+            <input id="incomeDate" type="date" required />
+
+            <button type="submit">Agregar ingreso</button>
+          </form>
+        </div>
+
+        <div class="card">
+          <div class="section-header">
+            <div>
+              <h2>Historial de ingresos</h2>
+              <p>Ingresos registrados en el mes seleccionado.</p>
+            </div>
+
+            <select id="filterIncomeCategory">
+              <option value="Todos">Todos</option>
+              <option>Sueldo</option>
+              <option>Negocio</option>
+              <option>Freelance</option>
+              <option>Ventas</option>
+              <option>Bonos</option>
+              <option>Inversiones</option>
+              <option>Regalo</option>
+              <option>Otros</option>
+            </select>
+          </div>
+
+          <div id="incomeList" class="income-list"></div>
+        </div>
+
+      </section>
+
+      <!-- GASTOS -->
+      <section id="gastos" class="section">
+
+        <h1>Gestión de Gastos</h1>
+        <p class="section-description">Registra y controla tus gastos diarios.</p>
+
+        <div class="card">
+          <h2>Agregar gasto</h2>
+
+          <form id="expenseForm" class="form-grid">
+            <input id="expenseName" placeholder="Descripción del gasto" required />
+            <input id="expenseAmount" type="number" placeholder="Monto" required />
+
+            <select id="expenseCategory">
+              <option>Comida</option>
+              <option>Transporte</option>
+              <option>Vivienda</option>
+              <option>Servicios</option>
+              <option>Salud</option>
+              <option>Compras</option>
+              <option>Educación</option>
+              <option>Entretenimiento</option>
+              <option>Viajes</option>
+              <option>Otros</option>
+            </select>
+
+            <select id="expenseAccount"></select>
+
+            <select id="expenseType">
+              <option>Variable</option>
+              <option>Fijo</option>
+              <option>Necesario</option>
+              <option>Opcional</option>
+            </select>
+
+            <input id="expenseDate" type="date" required />
+
+            <button type="submit">Agregar gasto</button>
+          </form>
+        </div>
+
+        <div class="card">
+          <div class="section-header">
+            <div>
+              <h2>Historial de gastos</h2>
+              <p>Movimientos del mes seleccionado.</p>
+            </div>
+
+            <select id="filterCategory">
+              <option value="Todos">Todos</option>
+              <option>Comida</option>
+              <option>Transporte</option>
+              <option>Vivienda</option>
+              <option>Servicios</option>
+              <option>Salud</option>
+              <option>Compras</option>
+              <option>Educación</option>
+              <option>Entretenimiento</option>
+              <option>Viajes</option>
+              <option>Otros</option>
+            </select>
+          </div>
+
+          <div id="expenseList" class="expense-list"></div>
+        </div>
+
+      </section>
+
+      <!-- AHORRO -->
+      <section id="ahorro" class="section">
+
+        <h1>Ahorro y Metas</h1>
+        <p class="section-description">
+          Configura presupuesto y metas. El ingreso mensual se calcula automáticamente desde la sección Ingresos.
+        </p>
+
+        <div class="card">
+          <h2>Ingreso mensual calculado</h2>
+          <p class="muted">
+            Este monto se obtiene sumando todos los ingresos registrados en el mes seleccionado.
+          </p>
+
+          <div class="saving-box">
+            <div>
+              <span>Ingresos del mes</span>
+              <strong id="calculatedIncomeText">S/ 0.00</strong>
+            </div>
+
+            <div>
+              <span>Mes seleccionado</span>
+              <strong id="selectedMonthText">---</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Meta de ahorro</h2>
+
+          <div class="saving-box">
+            <div>
+              <span>Meta</span>
+              <strong id="savingGoalText">S/ 0.00</strong>
+            </div>
+
+            <div>
+              <span>Progreso</span>
+              <strong id="savingPercent">0%</strong>
+            </div>
+          </div>
+
+          <div class="progress-bar">
+            <div id="savingProgress"></div>
+          </div>
+
+          <div class="goal-form">
+            <input id="goalInput" type="number" placeholder="Nueva meta de ahorro" />
+            <button id="updateGoalBtn">Actualizar meta</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Presupuesto mensual</h2>
+
+          <div class="saving-box">
+            <div>
+              <span>Presupuesto actual</span>
+              <strong id="budgetText">S/ 0.00</strong>
+            </div>
+          </div>
+
+          <div class="progress-bar budget">
+            <div id="budgetProgress"></div>
+          </div>
+
+          <div class="goal-form">
+            <input id="budgetInput" type="number" placeholder="Nuevo presupuesto" />
+            <button id="updateBudgetBtn">Actualizar presupuesto</button>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- REPORTES -->
+      <section id="reportes" class="section">
+
+        <h1>Reportes y Gráficos</h1>
+        <p class="section-description">Tus gráficos se actualizan con ingresos y gastos del mes seleccionado.</p>
+
+        <div class="charts-grid">
+          <div class="card chart-card">
+            <h2>Gastos por categoría</h2>
+            <canvas id="categoryChart"></canvas>
+          </div>
+
+          <div class="card chart-card">
+            <h2>Ingresos por categoría</h2>
+            <canvas id="incomeCategoryChart"></canvas>
+          </div>
+
+          <div class="card chart-card">
+            <h2>Resumen de últimos meses</h2>
+            <canvas id="trendChart"></canvas>
+          </div>
+
+          <div class="card chart-card">
+            <h2>Tipo de gasto</h2>
+            <canvas id="typeChart"></canvas>
+          </div>
+
+          <div class="card chart-card">
+            <h2>Ingresos vs Gastos</h2>
+            <canvas id="incomeExpenseChart"></canvas>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- CUENTAS -->
+      <section id="cuentas" class="section">
+
+        <h1>Cuentas</h1>
+        <p class="section-description">Administra cuentas bancarias, billeteras digitales, efectivo o ahorros.</p>
+
+        <div class="card">
+          <h2>Agregar cuenta</h2>
+
+          <form id="accountForm" class="form-grid">
+            <input id="accountName" placeholder="Nombre: BCP, Yape, Efectivo..." required />
+            <input id="accountBalance" type="number" placeholder="Saldo inicial" required />
+
+            <select id="accountType">
+              <option>Banco</option>
+              <option>Efectivo</option>
+              <option>Billetera digital</option>
+              <option>Tarjeta</option>
+              <option>Ahorro</option>
+            </select>
+
+            <button type="submit">Agregar cuenta</button>
+          </form>
+        </div>
+
+        <div class="card">
+          <h2>Mis cuentas</h2>
+          <p class="muted">
+            Desactivar una cuenta no borra información. Solo evita usarla en nuevos ingresos o gastos.
+          </p>
+
+          <div id="accountList" class="account-list"></div>
+        </div>
+
+      </section>
+
+    </main>
+
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
